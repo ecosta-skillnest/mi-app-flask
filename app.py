@@ -1,14 +1,29 @@
-# app.py
 from flask import Flask
-
+import pymysql
+import os
 
 app = Flask(__name__)
 
 
+def get_connection():
+    return pymysql.connect(
+        host=os.getenv("DB_HOST"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASSWORD"),
+        database=os.getenv("DB_NAME"),
+        port=int(os.getenv("DB_PORT", 3306))
+    )
+
+
 @app.route("/")
-def home():
-   return "¡Hola desde Flask!"
+def index():
+    connection = get_connection()
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT '¡Conectado a MySQL en Railway!'")
+        result = cursor.fetchone()
+    connection.close()
+    return result[0]
 
 
 if __name__ == "__main__":
-   app.run()
+    app.run()
